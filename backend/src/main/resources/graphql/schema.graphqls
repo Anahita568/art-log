@@ -1,0 +1,30 @@
+type Query {
+    artworks: [Artwork!]!
+    artwork(id: ID!): Artwork
+    tags(type: TagType): [Tag!]!
+}
+
+type Artwork {
+    id: ID!
+    title: String!
+    artist: String
+    year: Int
+    imageUrl: String
+    notes: String
+    createdDate: String!
+    tags: [Tag!]!
+}
+
+type Tag {
+    id: ID!
+    name: String!
+    type: TagType!
+}
+
+enum TagType {
+    MEDIUM
+    MOVEMENT
+    MOOD
+    COLOR
+    SUBJECT
+}

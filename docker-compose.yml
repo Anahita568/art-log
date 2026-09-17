@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: artlog
+      POSTGRES_USER: artlog
+      POSTGRES_PASSWORD: artlog
+    ports:
+      - "5432:5432"
+    volumes:
+      - artlog-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  artlog-postgres-data:
