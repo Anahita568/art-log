@@ -1,7 +1,13 @@
 type Query {
-    artworks: [Artwork!]!
+    artworks(filter: ArtworkFilterInput): [Artwork!]!
     artwork(id: ID!): Artwork
     tags(type: TagType): [Tag!]!
+}
+
+type Mutation {
+    addArtwork(input: AddArtworkInput!): Artwork!
+    updateArtworkNotes(id: ID!, notes: String): Artwork!
+    deleteArtwork(id: ID!): Boolean!
 }
 
 type Artwork {
@@ -27,4 +33,27 @@ enum TagType {
     MOOD
     COLOR
     SUBJECT
+}
+
+input ArtworkFilterInput {
+    mediums: [String!]
+    movements: [String!]
+    moods: [String!]
+    colors: [String!]
+    subjects: [String!]
+    search: String
+}
+
+input AddArtworkInput {
+    title: String!
+    artist: String
+    year: Int
+    imageUrl: String
+    notes: String
+    tags: [TagInput!]
+}
+
+input TagInput {
+    name: String!
+    type: TagType!
 }

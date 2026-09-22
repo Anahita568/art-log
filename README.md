@@ -9,13 +9,18 @@ TypeScript + Apollo Client (frontend, not yet scaffolded).
 
 ## Status
 
-Backend data model and read API are in place and verified end-to-end:
+Backend data model and GraphQL API are in place and verified end-to-end:
 
 - `Artwork` and `Tag` JPA entities, many-to-many via `artwork_tag`
-- `artworks`, `artwork(id)`, and `tags(type)` GraphQL queries
+- `artworks(filter)`, `artwork(id)`, and `tags(type)` queries
+- Composable tag filtering: any combination of medium/movement/mood/color/subject
+  values (AND across axes, OR within an axis), plus free-text search over
+  title/artist — see `ArtworkSpecifications`
+- Mutations: `addArtwork` (creating tags on the fly if they don't exist yet),
+  `updateArtworkNotes`, `deleteArtwork`
 - Seed data for a starter set of tags across all five axes
 
-Not yet built: mutations, filter input, and the frontend.
+Not yet built: the frontend.
 
 ## Backend setup
 
@@ -62,13 +67,29 @@ Example query:
 
 ```graphql
 {
-  artworks {
+  artworks(filter: { mediums: ["Oil paint"], moods: ["Nostalgic"], search: "night" }) {
     id
     title
     tags { name type }
   }
   tags(type: MOOD) {
     name
+  }
+}
+```
+
+Example mutation:
+
+```graphql
+mutation {
+  addArtwork(input: {
+    title: "Starry Night"
+    artist: "Vincent van Gogh"
+    year: 1889
+    tags: [{ name: "Oil paint", type: MEDIUM }, { name: "Nostalgic", type: MOOD }]
+  }) {
+    id
+    tags { name type }
   }
 }
 ```
