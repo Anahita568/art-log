@@ -22,3 +22,6 @@ spring:
 
 server:
   port: 8080
+
+artlog:
+  frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
