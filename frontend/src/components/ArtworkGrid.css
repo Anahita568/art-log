@@ -1,0 +1,16 @@
+.artwork-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.5rem;
+}
+
+.grid-status {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.grid-status--error {
+  color: var(--accent);
+}

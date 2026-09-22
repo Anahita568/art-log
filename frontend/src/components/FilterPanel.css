@@ -1,0 +1,64 @@
+.filter-panel {
+  position: sticky;
+  top: 1.5rem;
+  background: var(--paper-card);
+  border: 1px solid var(--rule-strong);
+  padding: 1.25rem 1rem;
+  box-shadow: 3px 3px 0 var(--shadow);
+}
+
+.filter-panel__label {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.5rem;
+}
+
+.filter-search {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.filter-search:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.filter-axis {
+  border: none;
+  border-top: 1px solid var(--rule);
+  padding: 0.75rem 0 0.25rem;
+  margin: 0;
+}
+
+.filter-axis legend {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0 0.3rem 0 0;
+  color: var(--ink);
+}
+
+.filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  padding: 0.3rem 0;
+  cursor: pointer;
+  color: var(--ink-soft);
+}
+
+.filter-checkbox:hover {
+  color: var(--ink);
+}
+
+.filter-checkbox input {
+  accent-color: var(--accent);
+}
