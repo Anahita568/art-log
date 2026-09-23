@@ -1,5 +1,5 @@
 type Query {
-    artworks(filter: ArtworkFilterInput): [Artwork!]!
+    artworks(filter: ArtworkFilterInput, sort: ArtworkSort = CREATED_DATE_DESC, page: Int = 0, pageSize: Int = 24): ArtworkPage!
     artwork(id: ID!): Artwork
     tags(type: TagType): [Tag!]!
 }
@@ -11,6 +11,20 @@ type Mutation {
     deleteArtwork(id: ID!): Boolean!
     renameTag(id: ID!, name: String!): Tag!
     deleteTag(id: ID!): Boolean!
+}
+
+type ArtworkPage {
+    items: [Artwork!]!
+    totalCount: Int!
+    hasMore: Boolean!
+}
+
+enum ArtworkSort {
+    CREATED_DATE_DESC
+    CREATED_DATE_ASC
+    YEAR_DESC
+    YEAR_ASC
+    TITLE_ASC
 }
 
 type Artwork {

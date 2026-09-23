@@ -14,3 +14,27 @@
 .grid-status--error {
   color: var(--accent);
 }
+
+.artwork-grid__load-more {
+  display: block;
+  margin: 2rem auto 0;
+  padding: 0.6rem 1.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-card);
+  color: var(--ink);
+}
+
+.artwork-grid__load-more:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.artwork-grid__load-more:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

@@ -1,19 +1,23 @@
 import { gql } from "@apollo/client";
 
 export const ARTWORKS_QUERY = gql`
-  query Artworks($filter: ArtworkFilterInput) {
-    artworks(filter: $filter) {
-      id
-      title
-      artist
-      year
-      imageUrl
-      notes
-      tags {
+  query Artworks($filter: ArtworkFilterInput, $sort: ArtworkSort, $page: Int, $pageSize: Int) {
+    artworks(filter: $filter, sort: $sort, page: $page, pageSize: $pageSize) {
+      items {
         id
-        name
-        type
+        title
+        artist
+        year
+        imageUrl
+        notes
+        tags {
+          id
+          name
+          type
+        }
       }
+      totalCount
+      hasMore
     }
   }
 `;

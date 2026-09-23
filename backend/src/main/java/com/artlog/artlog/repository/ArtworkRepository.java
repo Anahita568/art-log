@@ -15,6 +15,9 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long>, JpaSpec
     @EntityGraph(attributePaths = "tags")
     Optional<Artwork> findById(Long id);
 
+    @EntityGraph(attributePaths = "tags")
+    List<Artwork> findByIdIn(List<Long> ids);
+
     long countByTagsId(Long tagId);
 
     List<Artwork> findByTagsId(Long tagId);

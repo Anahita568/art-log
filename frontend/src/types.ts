@@ -28,6 +28,14 @@ export interface ArtworkFilterInput {
   search?: string;
 }
 
+export type ArtworkSort = "CREATED_DATE_DESC" | "CREATED_DATE_ASC" | "YEAR_DESC" | "YEAR_ASC" | "TITLE_ASC";
+
+export interface ArtworkPage {
+  items: Artwork[];
+  totalCount: number;
+  hasMore: boolean;
+}
+
 export interface TagInput {
   name: string;
   type: TagType;
