@@ -1,0 +1,112 @@
+.artwork-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(43, 36, 32, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 100;
+}
+
+.artwork-detail {
+  background: var(--paper-card);
+  border: 1px solid var(--rule-strong);
+  box-shadow: 6px 6px 0 var(--shadow);
+  max-width: 640px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.artwork-detail__close {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+}
+
+.artwork-detail__close:hover {
+  color: var(--accent);
+}
+
+.artwork-detail__image-frame {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 45vh;
+  overflow: hidden;
+  border-bottom: 1px dashed var(--rule-strong);
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.artwork-detail__image-frame img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+}
+
+.artwork-detail__body {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.artwork-detail__title {
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.artwork-detail__byline {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-style: italic;
+  font-family: var(--font-display);
+}
+
+.artwork-detail__notes-section {
+  border-top: 1px dotted var(--rule);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.artwork-detail__notes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.artwork-detail__notes-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.artwork-detail__notes {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+
+.artwork-detail__body > .card-action--delete {
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}

@@ -24,4 +24,4 @@ server:
   port: 8080
 
 artlog:
-  frontend-origin: ${FRONTEND_ORIGIN:http://localhost:5173}
+  frontend-origin-pattern: ${FRONTEND_ORIGIN_PATTERN:http://localhost:*}

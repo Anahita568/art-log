@@ -3,13 +3,25 @@ import "./ArtworkCard.css";
 
 interface ArtworkCardProps {
   artwork: Artwork;
+  onOpen: () => void;
 }
 
-export function ArtworkCard({ artwork }: ArtworkCardProps) {
+export function ArtworkCard({ artwork, onOpen }: ArtworkCardProps) {
   const byline = [artwork.artist, artwork.year?.toString()].filter(Boolean).join(", ");
 
   return (
-    <article className="artwork-card">
+    <article
+      className="artwork-card"
+      onClick={onOpen}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onOpen();
+        }
+      }}
+    >
       <div className="artwork-card__image-frame">
         {artwork.imageUrl ? (
           <img src={artwork.imageUrl} alt={artwork.title} loading="lazy" />
@@ -29,7 +41,6 @@ export function ArtworkCard({ artwork }: ArtworkCardProps) {
             ))}
           </ul>
         )}
-        {artwork.notes && <p className="artwork-card__notes">{artwork.notes}</p>}
       </div>
     </article>
   );
