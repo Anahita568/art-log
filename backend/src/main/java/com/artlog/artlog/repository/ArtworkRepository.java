@@ -1,5 +1,6 @@
 package com.artlog.artlog.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -13,4 +14,8 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long>, JpaSpec
     @Override
     @EntityGraph(attributePaths = "tags")
     Optional<Artwork> findById(Long id);
+
+    long countByTagsId(Long tagId);
+
+    List<Artwork> findByTagsId(Long tagId);
 }

@@ -9,6 +9,8 @@ type Mutation {
     updateArtwork(id: ID!, input: UpdateArtworkInput!): Artwork!
     updateArtworkNotes(id: ID!, notes: String): Artwork!
     deleteArtwork(id: ID!): Boolean!
+    renameTag(id: ID!, name: String!): Tag!
+    deleteTag(id: ID!): Boolean!
 }
 
 type Artwork {
@@ -26,6 +28,7 @@ type Tag {
     id: ID!
     name: String!
     type: TagType!
+    usageCount: Int!
 }
 
 enum TagType {

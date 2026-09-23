@@ -49,3 +49,19 @@ export const DELETE_ARTWORK_MUTATION = gql`
     deleteArtwork(id: $id)
   }
 `;
+
+export const RENAME_TAG_MUTATION = gql`
+  mutation RenameTag($id: ID!, $name: String!) {
+    renameTag(id: $id, name: $name) {
+      id
+      name
+      type
+    }
+  }
+`;
+
+export const DELETE_TAG_MUTATION = gql`
+  mutation DeleteTag($id: ID!) {
+    deleteTag(id: $id)
+  }
+`;

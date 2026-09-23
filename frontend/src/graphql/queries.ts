@@ -24,6 +24,7 @@ export const TAGS_QUERY = gql`
       id
       name
       type
+      usageCount
     }
   }
 `;

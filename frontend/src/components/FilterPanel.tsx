@@ -1,17 +1,18 @@
 import { useQuery } from "@apollo/client/react";
 import { TAGS_QUERY } from "../graphql/queries";
-import { TAG_AXES } from "../tagAxes";
-import type { ArtworkFilterInput, Tag, TagAxisKey, TagType } from "../types";
+import { groupTagsByType, TAG_AXES } from "../tagAxes";
+import type { ArtworkFilterInput, Tag, TagAxisKey } from "../types";
 import "./FilterPanel.css";
 
 interface FilterPanelProps {
   filter: ArtworkFilterInput;
   onChange: (filter: ArtworkFilterInput) => void;
+  onManageTags: () => void;
 }
 
-export function FilterPanel({ filter, onChange }: FilterPanelProps) {
+export function FilterPanel({ filter, onChange, onManageTags }: FilterPanelProps) {
   const { data } = useQuery<{ tags: Tag[] }>(TAGS_QUERY);
-  const tagsByType = groupByType(data?.tags ?? []);
+  const tagsByType = groupTagsByType(data?.tags ?? []);
 
   function toggleTag(axisKey: TagAxisKey, name: string) {
     const current = filter[axisKey] ?? [];
@@ -45,14 +46,10 @@ export function FilterPanel({ filter, onChange }: FilterPanelProps) {
           ))}
         </fieldset>
       ))}
+
+      <button type="button" className="filter-panel__manage-tags" onClick={onManageTags}>
+        Manage tags
+      </button>
     </aside>
   );
-}
-
-function groupByType(tags: Tag[]): Partial<Record<TagType, Tag[]>> {
-  const grouped: Partial<Record<TagType, Tag[]>> = {};
-  for (const tag of tags) {
-    (grouped[tag.type] ??= []).push(tag);
-  }
-  return grouped;
 }
