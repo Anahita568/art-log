@@ -64,6 +64,13 @@
   gap: 0.75rem;
 }
 
+.artwork-detail__title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 .artwork-detail__title {
   font-size: 1.5rem;
   line-height: 1.3;

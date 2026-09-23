@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "@apollo/client/react";
-import { DELETE_ARTWORK_MUTATION, UPDATE_ARTWORK_NOTES_MUTATION } from "../graphql/mutations";
-import type { Artwork } from "../types";
+import {
+  DELETE_ARTWORK_MUTATION,
+  UPDATE_ARTWORK_MUTATION,
+  UPDATE_ARTWORK_NOTES_MUTATION,
+} from "../graphql/mutations";
+import type { AddArtworkInput, Artwork } from "../types";
+import { ArtworkForm } from "./ArtworkForm";
 import "./ArtworkDetail.css";
 
 interface ArtworkDetailProps {
@@ -12,8 +17,12 @@ interface ArtworkDetailProps {
 export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [draftNotes, setDraftNotes] = useState(artwork.notes ?? "");
+  const [isEditingDetails, setIsEditingDetails] = useState(false);
 
   const [updateNotes, { loading: savingNotes }] = useMutation(UPDATE_ARTWORK_NOTES_MUTATION);
+  const [updateArtwork, { loading: savingDetails, error: detailsError }] = useMutation(UPDATE_ARTWORK_MUTATION, {
+    refetchQueries: ["Artworks", "Tags"],
+  });
   const [deleteArtwork, { loading: deleting }] = useMutation(DELETE_ARTWORK_MUTATION, {
     refetchQueries: ["Artworks"],
   });
@@ -45,6 +54,12 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
     }
   }
 
+  async function saveDetails(input: AddArtworkInput) {
+    const { title, artist, year, imageUrl, tags } = input;
+    await updateArtwork({ variables: { id: artwork.id, input: { title, artist, year, imageUrl, tags } } });
+    setIsEditingDetails(false);
+  }
+
   return (
     <div className="artwork-detail-overlay" onClick={onClose}>
       <div className="artwork-detail" onClick={(event) => event.stopPropagation()}>
@@ -61,17 +76,38 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
         </div>
 
         <div className="artwork-detail__body">
-          <h2 className="artwork-detail__title">{artwork.title}</h2>
-          {byline && <p className="artwork-detail__byline">{byline}</p>}
+          {isEditingDetails ? (
+            <ArtworkForm
+              heading="Edit details"
+              submitLabel="Save changes"
+              pendingLabel="Saving…"
+              initialArtwork={artwork}
+              showNotes={false}
+              submitting={savingDetails}
+              error={detailsError}
+              onSubmit={saveDetails}
+              onCancel={() => setIsEditingDetails(false)}
+            />
+          ) : (
+            <>
+              <div className="artwork-detail__title-row">
+                <h2 className="artwork-detail__title">{artwork.title}</h2>
+                <button type="button" className="card-action" onClick={() => setIsEditingDetails(true)}>
+                  Edit details
+                </button>
+              </div>
+              {byline && <p className="artwork-detail__byline">{byline}</p>}
 
-          {artwork.tags.length > 0 && (
-            <ul className="artwork-card__tags">
-              {artwork.tags.map((tag) => (
-                <li key={tag.id} className={`tag-chip tag-chip--${tag.type.toLowerCase()}`}>
-                  {tag.name}
-                </li>
-              ))}
-            </ul>
+              {artwork.tags.length > 0 && (
+                <ul className="artwork-card__tags">
+                  {artwork.tags.map((tag) => (
+                    <li key={tag.id} className={`tag-chip tag-chip--${tag.type.toLowerCase()}`}>
+                      {tag.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
 
           <div className="artwork-detail__notes-section">

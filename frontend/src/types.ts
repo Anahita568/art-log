@@ -40,3 +40,11 @@ export interface AddArtworkInput {
   notes: string | null;
   tags: TagInput[];
 }
+
+export interface UpdateArtworkInput {
+  title: string;
+  artist: string | null;
+  year: number | null;
+  imageUrl: string | null;
+  tags: TagInput[];
+}

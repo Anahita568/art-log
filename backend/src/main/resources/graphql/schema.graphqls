@@ -6,6 +6,7 @@ type Query {
 
 type Mutation {
     addArtwork(input: AddArtworkInput!): Artwork!
+    updateArtwork(id: ID!, input: UpdateArtworkInput!): Artwork!
     updateArtworkNotes(id: ID!, notes: String): Artwork!
     deleteArtwork(id: ID!): Boolean!
 }
@@ -56,4 +57,12 @@ input AddArtworkInput {
 input TagInput {
     name: String!
     type: TagType!
+}
+
+input UpdateArtworkInput {
+    title: String!
+    artist: String
+    year: Int
+    imageUrl: String
+    tags: [TagInput!]
 }

@@ -32,6 +32,18 @@ public class ArtworkMutationController {
     }
 
     @MutationMapping
+    public Artwork updateArtwork(@Argument Long id, @Argument UpdateArtworkInput input) {
+        Artwork artwork = artworkRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No artwork with id " + id));
+        artwork.setTitle(input.title());
+        artwork.setArtist(input.artist());
+        artwork.setYear(input.year());
+        artwork.setImageUrl(input.imageUrl());
+        artwork.setTags(tagService.findOrCreateAll(input.tags()));
+        return artworkRepository.save(artwork);
+    }
+
+    @MutationMapping
     public Artwork updateArtworkNotes(@Argument Long id, @Argument String notes) {
         Artwork artwork = artworkRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No artwork with id " + id));

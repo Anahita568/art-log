@@ -18,6 +18,23 @@ export const ADD_ARTWORK_MUTATION = gql`
   }
 `;
 
+export const UPDATE_ARTWORK_MUTATION = gql`
+  mutation UpdateArtwork($id: ID!, $input: UpdateArtworkInput!) {
+    updateArtwork(id: $id, input: $input) {
+      id
+      title
+      artist
+      year
+      imageUrl
+      tags {
+        id
+        name
+        type
+      }
+    }
+  }
+`;
+
 export const UPDATE_ARTWORK_NOTES_MUTATION = gql`
   mutation UpdateArtworkNotes($id: ID!, $notes: String) {
     updateArtworkNotes(id: $id, notes: $notes) {
