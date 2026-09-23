@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { Artwork } from "../types";
 import "./ArtworkCard.css";
 
@@ -7,6 +8,9 @@ interface ArtworkCardProps {
 }
 
 export function ArtworkCard({ artwork, onOpen }: ArtworkCardProps) {
+  const [imageBroken, setImageBroken] = useState(false);
+  useEffect(() => setImageBroken(false), [artwork.imageUrl]);
+
   const byline = [artwork.artist, artwork.year?.toString()].filter(Boolean).join(", ");
 
   return (
@@ -23,8 +27,13 @@ export function ArtworkCard({ artwork, onOpen }: ArtworkCardProps) {
       }}
     >
       <div className="artwork-card__image-frame">
-        {artwork.imageUrl ? (
-          <img src={artwork.imageUrl} alt={artwork.title} loading="lazy" />
+        {artwork.imageUrl && !imageBroken ? (
+          <img
+            src={artwork.imageUrl}
+            alt={artwork.title}
+            loading="lazy"
+            onError={() => setImageBroken(true)}
+          />
         ) : (
           <div className="artwork-card__placeholder">no image on file</div>
         )}

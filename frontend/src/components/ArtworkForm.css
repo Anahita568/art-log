@@ -48,6 +48,14 @@
   font-family: var(--font-mono);
 }
 
+.artwork-form__preview {
+  max-width: 100%;
+  max-height: 12rem;
+  width: auto;
+  align-self: flex-start;
+  border: 1px solid var(--rule-strong);
+}
+
 .hint {
   text-transform: none;
   letter-spacing: normal;

@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { TAG_AXES } from "../tagAxes";
 import type { AddArtworkInput, Artwork, TagInput, TagType } from "../types";
+import { uploadImage } from "../uploadImage";
 import "./ArtworkForm.css";
 
 type AxisText = Record<TagType, string>;
@@ -67,6 +68,27 @@ export function ArtworkForm({
 }: ArtworkFormProps) {
   const [details, setDetails] = useState<Details>(() => detailsFromArtwork(initialArtwork));
   const [axisText, setAxisText] = useState<AxisText>(() => axisTextFromArtwork(initialArtwork));
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [imageBroken, setImageBroken] = useState(false);
+
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const imageUrl = await uploadImage(file);
+      setDetails((current) => ({ ...current, imageUrl }));
+      setImageBroken(false);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Image upload failed");
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -106,8 +128,30 @@ export function ArtworkForm({
       </label>
       <label>
         Image URL
-        <input value={details.imageUrl} onChange={(e) => setDetails({ ...details, imageUrl: e.target.value })} />
+        <input
+          value={details.imageUrl}
+          onChange={(e) => {
+            setDetails({ ...details, imageUrl: e.target.value });
+            setImageBroken(false);
+          }}
+          placeholder="Paste a link, or upload a file below"
+        />
       </label>
+      <label>
+        Upload an image
+        <input type="file" accept="image/*" onChange={handleFileChange} disabled={isUploading} />
+      </label>
+      {isUploading && <p className="hint">Uploading…</p>}
+      {uploadError && <p className="form-error">{uploadError}</p>}
+      {details.imageUrl && !imageBroken && (
+        <img
+          className="artwork-form__preview"
+          src={details.imageUrl}
+          alt="Preview"
+          onError={() => setImageBroken(true)}
+        />
+      )}
+      {details.imageUrl && imageBroken && <p className="form-error">Couldn't load that image.</p>}
       {showNotes && (
         <label>
           Notes

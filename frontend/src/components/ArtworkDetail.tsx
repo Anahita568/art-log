@@ -18,6 +18,7 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [draftNotes, setDraftNotes] = useState(artwork.notes ?? "");
   const [isEditingDetails, setIsEditingDetails] = useState(false);
+  const [imageBroken, setImageBroken] = useState(false);
 
   const [updateNotes, { loading: savingNotes }] = useMutation(UPDATE_ARTWORK_NOTES_MUTATION);
   const [updateArtwork, { loading: savingDetails, error: detailsError }] = useMutation(UPDATE_ARTWORK_MUTATION, {
@@ -34,6 +35,8 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose]);
+
+  useEffect(() => setImageBroken(false), [artwork.imageUrl]);
 
   const byline = [artwork.artist, artwork.year?.toString()].filter(Boolean).join(", ");
 
@@ -68,8 +71,8 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
         </button>
 
         <div className="artwork-detail__image-frame">
-          {artwork.imageUrl ? (
-            <img src={artwork.imageUrl} alt={artwork.title} />
+          {artwork.imageUrl && !imageBroken ? (
+            <img src={artwork.imageUrl} alt={artwork.title} onError={() => setImageBroken(true)} />
           ) : (
             <div className="artwork-card__placeholder">no image on file</div>
           )}
