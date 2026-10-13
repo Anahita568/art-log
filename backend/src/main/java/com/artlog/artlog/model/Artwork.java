@@ -111,6 +111,9 @@ public class Artwork {
     }
 
     public void setTags(Set<Tag> tags) {
-        this.tags = tags;
+        // Defensive copy: Hibernate wraps whatever collection instance is assigned here directly
+        // (no copy of its own), so an immutable Set passed in would blow up the first time anything
+        // tries to mutate it later, e.g. TagService#deleteTag removing a tag from this artwork.
+        this.tags = new HashSet<>(tags);
     }
 }
