@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Artwork } from "../types";
+import { TagLabel } from "./TagLabel";
 import "./ArtworkCard.css";
 
 interface ArtworkCardProps {
@@ -42,13 +43,11 @@ export function ArtworkCard({ artwork, onOpen }: ArtworkCardProps) {
         <h3 className="artwork-card__title">{artwork.title}</h3>
         {byline && <p className="artwork-card__byline">{byline}</p>}
         {artwork.tags.length > 0 && (
-          <ul className="artwork-card__tags">
+          <p className="artwork-card__tags">
             {artwork.tags.map((tag) => (
-              <li key={tag.id} className={`tag-chip tag-chip--${tag.type.toLowerCase()}`}>
-                {tag.name}
-              </li>
+              <TagLabel key={tag.id} tag={tag} />
             ))}
-          </ul>
+          </p>
         )}
       </div>
     </article>

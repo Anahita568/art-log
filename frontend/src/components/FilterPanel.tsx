@@ -21,35 +21,43 @@ export function FilterPanel({ filter, onChange, onManageTags }: FilterPanelProps
   }
 
   return (
-    <aside className="filter-panel">
-      <div className="filter-panel__label">Search the collection</div>
+    <section className="filter-panel">
       <input
         type="search"
         className="filter-search"
-        placeholder="Title or artist…"
+        placeholder="Search by title or artist…"
         value={filter.search ?? ""}
         onChange={(event) => onChange({ ...filter, search: event.target.value || undefined })}
       />
 
-      {TAG_AXES.map(({ type, label, filterKey }) => (
-        <fieldset key={type} className="filter-axis">
-          <legend>{label}</legend>
-          {(tagsByType[type] ?? []).map((tag) => (
-            <label key={tag.id} className="filter-checkbox">
-              <input
-                type="checkbox"
-                checked={(filter[filterKey] ?? []).includes(tag.name)}
-                onChange={() => toggleTag(filterKey, tag.name)}
-              />
-              <span>{tag.name}</span>
-            </label>
-          ))}
-        </fieldset>
-      ))}
+      <div className="filter-axes">
+        {TAG_AXES.map(({ type, label, filterKey }) => {
+          const tags = tagsByType[type] ?? [];
+          if (tags.length === 0) return null;
+          return (
+            <div key={type} className="filter-axis">
+              <span className={`filter-axis__label filter-axis__label--${type.toLowerCase()}`}>{label}</span>
+              {tags.map((tag) => {
+                const active = (filter[filterKey] ?? []).includes(tag.name);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    className={active ? "filter-tag filter-tag--active" : "filter-tag"}
+                    onClick={() => toggleTag(filterKey, tag.name)}
+                  >
+                    {tag.name}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
 
       <button type="button" className="filter-panel__manage-tags" onClick={onManageTags}>
         Manage tags
       </button>
-    </aside>
+    </section>
   );
 }

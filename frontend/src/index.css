@@ -1,21 +1,17 @@
 :root {
-  --paper: #f3ead5;
-  --paper-card: #fbf6ea;
-  --ink: #2b2420;
-  --ink-soft: #6e6152;
-  --rule: #d8c8a4;
-  --rule-strong: #b9a679;
-  --accent: #9c3b2e;
-  --shadow: rgba(43, 36, 32, 0.22);
+  --ink: #000000;
+  --ink-soft: #6b6b6b;
+  --paper: #ffffff;
+  --rule: #e8e8e8;
+  --accent: #0047ff;
 
-  --tag-medium: #5f7a52;
-  --tag-movement: #395670;
-  --tag-mood: #9c3b2e;
-  --tag-color: #93582f;
-  --tag-subject: #5c4a80;
+  --mark-medium: #0047ff;
+  --mark-movement: #ff3b30;
+  --mark-mood: #b8860b;
+  --mark-color: #34c759;
+  --mark-subject: #000000;
 
-  --font-display: "Libre Baskerville", Georgia, serif;
-  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   color-scheme: light;
 }
@@ -32,17 +28,14 @@ body {
 
 body {
   background-color: var(--paper);
-  background-image: radial-gradient(var(--rule) 0.5px, transparent 0.5px);
-  background-size: 18px 18px;
   color: var(--ink);
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   min-height: 100vh;
 }
 
 h1,
 h2,
 h3 {
-  font-family: var(--font-display);
   font-weight: 700;
   margin: 0;
 }
@@ -52,6 +45,7 @@ button {
 }
 
 input,
-textarea {
-  font-family: var(--font-mono);
+textarea,
+select {
+  font-family: inherit;
 }

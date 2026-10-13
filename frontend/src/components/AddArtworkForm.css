@@ -1,21 +1,12 @@
 .add-artwork-toggle {
-  align-self: flex-start;
-  background: var(--accent);
-  color: var(--paper-card);
   border: none;
-  padding: 0.6rem 1.1rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--accent);
   cursor: pointer;
-  box-shadow: 3px 3px 0 var(--shadow);
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
 }
 
 .add-artwork-toggle:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 var(--shadow);
+  text-decoration: underline;
 }

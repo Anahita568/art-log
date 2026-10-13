@@ -7,6 +7,7 @@ import {
 } from "../graphql/mutations";
 import type { AddArtworkInput, Artwork } from "../types";
 import { ArtworkForm } from "./ArtworkForm";
+import { TagLabel } from "./TagLabel";
 import "./ArtworkDetail.css";
 
 interface ArtworkDetailProps {
@@ -102,13 +103,11 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
               {byline && <p className="artwork-detail__byline">{byline}</p>}
 
               {artwork.tags.length > 0 && (
-                <ul className="artwork-card__tags">
+                <p className="artwork-card__tags">
                   {artwork.tags.map((tag) => (
-                    <li key={tag.id} className={`tag-chip tag-chip--${tag.type.toLowerCase()}`}>
-                      {tag.name}
-                    </li>
+                    <TagLabel key={tag.id} tag={tag} />
                   ))}
-                </ul>
+                </p>
               )}
             </>
           )}

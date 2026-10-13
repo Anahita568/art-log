@@ -23,27 +23,27 @@ export default function App() {
     <div className="app">
       <header className="app__header">
         <h1>Art Log</h1>
-        <p className="app__subtitle">A catalog of pieces worth remembering.</p>
+        <p className="app__subtitle">track your art</p>
       </header>
-      <div className="app__body">
-        <FilterPanel filter={filter} onChange={setFilter} onManageTags={() => setIsManagingTags(true)} />
-        <main className="app__main">
-          <AddArtworkForm />
-          <div className="app__toolbar">
-            <label className="app__sort">
-              Sort by
-              <select value={sort} onChange={(event) => setSort(event.target.value as ArtworkSort)}>
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <ArtworkGrid key={`${JSON.stringify(filter)}|${sort}`} filter={filter} sort={sort} />
-        </main>
+
+      <FilterPanel filter={filter} onChange={setFilter} onManageTags={() => setIsManagingTags(true)} />
+
+      <div className="app__toolbar">
+        <AddArtworkForm />
+        <label className="app__sort">
+          Sort by
+          <select value={sort} onChange={(event) => setSort(event.target.value as ArtworkSort)}>
+            {SORT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
+
+      <ArtworkGrid key={`${JSON.stringify(filter)}|${sort}`} filter={filter} sort={sort} />
+
       {isManagingTags && <TagManager onClose={() => setIsManagingTags(false)} />}
     </div>
   );
