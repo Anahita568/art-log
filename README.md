@@ -174,7 +174,7 @@ a second database, `artlog_test`, owned by the same role.
 ### Run
 
 ```bash
-cd backend && mvn spring-boot:run   # http://localhost:8080/graphiql
+cd backend && mvn spring-boot:run   # http://localhost:8080/graphiql (with GRAPHIQL_ENABLED=true)
 cd frontend && npm install && npm run dev   # http://localhost:5173 (or whatever port Vite picks)
 ```
 
@@ -197,31 +197,48 @@ cd backend && mvn test
 cd frontend && npm test
 ```
 
+## Deploy
+
+Backend on **Render** (Docker, from `backend/Dockerfile`), database on
+**Neon** (free Postgres that doesn't expire, unlike Render's free
+databases), frontend on **Vercel**. Images already live in Cloudinary.
+
+1. **Neon** — create a project, and copy the connection details from the
+   dashboard. `DB_URL` must be the JDBC form,
+   `jdbc:postgresql://<host>/<db>?sslmode=require`. Put the username and
+   password in `DB_USERNAME`/`DB_PASSWORD`, not in the URL.
+2. **Render** — New → Web Service from the GitHub repo, root directory
+   `backend`, runtime Docker. Set the env vars:
+   - `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`
+   - `IMAGE_STORAGE=cloudinary` and `CLOUDINARY_URL` (regenerate the
+     secret first)
+   - `ADMIN_TOKEN`: a fresh `openssl rand -base64 32`, not the dev one
+   - `FRONTEND_ORIGIN_PATTERN`: the Vercel URL from step 3; update it
+     once that's known
+
+   Render sets `PORT` itself. On first boot, Hibernate creates the schema
+   and `data.sql` seeds the tags. Free instances spin down when idle, so
+   the first request after a while takes up to a minute.
+3. **Vercel** — import the repo, root directory `frontend` (it detects
+   Vite). Set `VITE_GRAPHQL_URI=https://<render-app>.onrender.com/graphql`
+   and `VITE_API_ORIGIN=https://<render-app>.onrender.com`. They're baked
+   in at build time, so changing them later needs a redeploy.
+4. Set `FRONTEND_ORIGIN_PATTERN` on Render to the Vercel URL (e.g.
+   `https://art-log.vercel.app`). Then open the site, use "Owner sign
+   in" with the production `ADMIN_TOKEN`, and log a piece.
+
+GraphiQL is off unless `GRAPHIQL_ENABLED=true` (set in the local `.env`).
+The deployed database starts empty; local data stays local.
+
 ## Next steps
 
-1. **Deploy prep** — small config changes the hosts need:
-   - `server.port: ${PORT:8080}` (Render and Railway assign the port).
-   - `spring.datasource.url: ${DB_URL:jdbc:postgresql://localhost:5432/artlog}`.
-     Hosts hand out `postgresql://user:pass@host/db` URLs, which need
-     rewriting to `jdbc:postgresql://host:5432/db` with the username and
-     password set separately.
-   - GraphiQL off unless enabled by an env var.
-   - A `Dockerfile` for the backend if deploying to Render (it has no
-     native Java runtime). Railway builds Maven projects directly.
-   - Regenerate the Cloudinary API secret before setting it on the host.
-2. **Deploy** — backend → Render/Railway with a managed Postgres instance;
-   frontend → Vercel/Netlify. Backend env: `DB_URL`, `DB_USERNAME`,
-   `DB_PASSWORD`, `FRONTEND_ORIGIN_PATTERN` (the frontend's deployed
-   URL), `IMAGE_STORAGE=cloudinary`, `CLOUDINARY_URL`, `ADMIN_TOKEN` (a fresh
-   one, not the local dev token). Frontend env (baked in at build time, so
-   changes need a rebuild): `VITE_GRAPHQL_URI`, `VITE_API_ORIGIN`. The deployed database starts
-   empty; local test data stays local.
-3. **Test coverage** — add tests alongside new mutations/components as
+1. **Deploy** — follow [Deploy](#deploy) above. Nothing is live yet.
+2. **Test coverage** — add tests alongside new mutations/components as
    they're touched, rather than another backfill pass; the current tests
    intentionally cover only the logic that's complex enough for a bug to
    be invisible by eye.
-4. **Real data** — once deployed, actually log art you've seen.
-5. **Multi-user accounts (later, if wanted)** — let anyone sign up and keep
+3. **Real data** — once deployed, actually log art you've seen.
+4. **Multi-user accounts (later, if wanted)** — let anyone sign up and keep
    their own catalog. This replaces the single admin token. Likely shape:
    - A managed auth provider (Clerk/Auth0), with the backend as an OAuth2
      resource server validating its JWTs.

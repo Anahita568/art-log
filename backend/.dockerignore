@@ -1,0 +1,4 @@
+# Keep local secrets, build output, and dev uploads out of the image.
+.env
+target/
+uploads/
