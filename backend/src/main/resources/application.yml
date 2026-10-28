@@ -1,6 +1,9 @@
 spring:
   application:
     name: artlog
+  config:
+    # Local secrets/overrides (gitignored); see .env.example. Real env vars still take precedence.
+    import: optional:file:.env[.properties]
   datasource:
     url: jdbc:postgresql://localhost:5432/artlog
     username: ${DB_USERNAME:artlog}
@@ -29,4 +32,7 @@ server:
 
 artlog:
   frontend-origin-pattern: ${FRONTEND_ORIGIN_PATTERN:http://localhost:*}
-  upload-dir: ${UPLOAD_DIR:uploads}
+  storage: ${IMAGE_STORAGE:local}  # local | cloudinary
+  upload-dir: ${UPLOAD_DIR:uploads}  # local storage only
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}  # local storage only
+  cloudinary-url: ${CLOUDINARY_URL:}  # cloudinary storage only

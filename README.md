@@ -57,9 +57,14 @@ React + Apollo Client  ──GraphQL (HTTP POST /graphql)──>  Spring for Gra
   (rejects a collision with another tag of the same name+axis), and tag
   delete (detaches the tag from every artwork that has it, rather than
   failing on the `artwork_tag` foreign key).
-- `web/ImageUploadController` — a plain REST endpoint that writes uploaded
-  images to local disk (`artlog.upload-dir`, default `./uploads`) and
-  returns a URL. **This won't survive deployment as-is** — see Next steps.
+- `web/ImageUploadController` — a plain REST endpoint that validates the
+  image type and hands the bytes to an `ImageStorage`, returning the
+  absolute URL it gives back.
+- `storage/` — `ImageStorage` and its two implementations, picked by
+  `artlog.storage` (`IMAGE_STORAGE` env var): `LocalDiskImageStorage`
+  (default; writes to `artlog.upload-dir` and serves `/uploads/**` itself —
+  dev only, since deploy hosts don't keep a persistent filesystem) and
+  `CloudinaryImageStorage` (configured by `CLOUDINARY_URL`).
 - `config/WebConfig` — CORS, scoped to `http://localhost:*` so the frontend
   dev server can run on any port Vite picks.
 
@@ -79,7 +84,9 @@ collision and delete-reassociation logic. Both run against a real local
 Postgres database (`artlog_test`), not H2 — Postgres-specific behavior
 (the `oid`-vs-`text` column mapping, a Hibernate 6 join-fetch collision)
 has already bitten this project twice, so fidelity mattered more than
-speed. Run with `mvn test`.
+speed. `ImageUploadControllerTest`, `LocalDiskImageStorageTest`, and
+`CloudinaryImageStorageTest` (a malformed `CLOUDINARY_URL` must not leak
+the API secret into logs) are plain unit tests (no database). Run with `mvn test`.
 
 ## Frontend
 
@@ -154,6 +161,11 @@ cd backend && mvn spring-boot:run   # http://localhost:8080/graphiql
 cd frontend && npm install && npm run dev   # http://localhost:5173 (or whatever port Vite picks)
 ```
 
+Images go to `backend/uploads/` by default. To use Cloudinary instead,
+`cp backend/.env.example backend/.env` and fill in `CLOUDINARY_URL` (from
+the Cloudinary console, Settings → API Keys). The backend loads
+`backend/.env` on startup; it's gitignored, and real env vars override it.
+
 On backend startup, Hibernate creates the schema (`ddl-auto: update`) and
 `data.sql` seeds a starter set of tags.
 
@@ -166,18 +178,16 @@ cd frontend && npm test
 
 ## Next steps
 
-1. **Image storage** — `ImageUploadController` writes to local disk, which
-   won't survive a deploy (most hosts have ephemeral or no persistent
-   filesystem). Move to S3 or Cloudinary before deploying.
-2. **Deploy** — nothing is deployed yet. Backend → Render/Railway with a
-   managed Postgres instance; frontend → Vercel/Netlify.
-3. **Test coverage** — add tests alongside new mutations/components as
+1. **Deploy** — nothing is deployed yet. Backend → Render/Railway with a
+   managed Postgres instance and `IMAGE_STORAGE=cloudinary` +
+   `CLOUDINARY_URL` set; frontend → Vercel/Netlify.
+2. **Test coverage** — add tests alongside new mutations/components as
    they're touched, rather than another backfill pass; the current tests
    intentionally cover only the logic that's complex enough for a bug to
    be invisible by eye.
-4. **Stretch features** (all optional, from the original plan): URL-synced
+3. **Stretch features** (all optional, from the original plan): URL-synced
    filter state for shareable/bookmarkable views; custom "shelves" or
    collections; auth (likely moot for a single-user personal tool, but
    worth a conscious decision).
-5. **Real data** — the catalog is functionally complete; the last step is
+4. **Real data** — the catalog is functionally complete; the last step is
    actually logging art you've seen.

@@ -1,19 +1,16 @@
 package com.artlog.artlog.web;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.artlog.artlog.storage.ImageStorage;
 
 @RestController
 public class ImageUploadController {
@@ -24,11 +21,10 @@ public class ImageUploadController {
             "image/webp", ".webp",
             "image/gif", ".gif");
 
-    private final Path uploadDir;
+    private final ImageStorage imageStorage;
 
-    public ImageUploadController(@Value("${artlog.upload-dir}") String uploadDir) throws IOException {
-        this.uploadDir = Path.of(uploadDir).toAbsolutePath();
-        Files.createDirectories(this.uploadDir);
+    public ImageUploadController(ImageStorage imageStorage) {
+        this.imageStorage = imageStorage;
     }
 
     @PostMapping("/api/images")
@@ -39,9 +35,7 @@ public class ImageUploadController {
                     .body(Map.of("error", "Unsupported image type: " + file.getContentType()));
         }
 
-        String filename = UUID.randomUUID() + extension;
-        Files.copy(file.getInputStream(), uploadDir.resolve(filename));
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("url", "/uploads/" + filename));
+        String url = imageStorage.store(file.getBytes(), extension);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("url", url));
     }
 }

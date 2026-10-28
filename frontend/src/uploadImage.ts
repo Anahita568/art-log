@@ -15,5 +15,5 @@ export async function uploadImage(file: File): Promise<string> {
   }
 
   const { url }: { url: string } = await response.json();
-  return `${API_ORIGIN}${url}`;
+  return url;
 }
