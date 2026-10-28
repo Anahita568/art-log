@@ -11,9 +11,10 @@ const PAGE_SIZE = 24;
 interface ArtworkGridProps {
   filter: ArtworkFilterInput;
   sort: ArtworkSort;
+  canEdit: boolean;
 }
 
-export function ArtworkGrid({ filter, sort }: ArtworkGridProps) {
+export function ArtworkGrid({ filter, sort, canEdit }: ArtworkGridProps) {
   const { data, loading, error, fetchMore } = useQuery<{ artworks: ArtworkPage }>(ARTWORKS_QUERY, {
     variables: { filter, sort, page: 0, pageSize: PAGE_SIZE },
   });
@@ -66,7 +67,7 @@ export function ArtworkGrid({ filter, sort }: ArtworkGridProps) {
         </button>
       )}
 
-      {openArtwork && <ArtworkDetail artwork={openArtwork} onClose={() => setOpenArtworkId(null)} />}
+      {openArtwork && <ArtworkDetail artwork={openArtwork} canEdit={canEdit} onClose={() => setOpenArtworkId(null)} />}
     </>
   );
 }

@@ -2,7 +2,11 @@ type Query {
     artworks(filter: ArtworkFilterInput, sort: ArtworkSort = CREATED_DATE_DESC, page: Int = 0, pageSize: Int = 24): ArtworkPage!
     artwork(id: ID!): Artwork
     tags(type: TagType): [Tag!]!
+    "Whether this request carries the admin token, i.e. may run mutations."
+    isAdmin: Boolean!
 }
+
+"All mutations require the admin token (X-Admin-Token header); queries are public."
 
 type Mutation {
     addArtwork(input: AddArtworkInput!): Artwork!

@@ -65,6 +65,14 @@ React + Apollo Client  ──GraphQL (HTTP POST /graphql)──>  Spring for Gra
   (default; writes to `artlog.upload-dir` and serves `/uploads/**` itself —
   dev only, since deploy hosts don't keep a persistent filesystem) and
   `CloudinaryImageStorage` (configured by `CLOUDINARY_URL`).
+- `admin/AdminToken` + `graphql/AdminTokenInterceptor` — visitors browse
+  read-only; writes need the `ADMIN_TOKEN` secret in an `X-Admin-Token`
+  header. The interceptor parses each GraphQL document and rejects it
+  before execution if *any* operation in it is a mutation (not just the
+  one `operationName` selects), so a mutation can't ride along with a
+  query. It also sets an `isAdmin` context value, which the `isAdmin`
+  query returns so the frontend can check a token. `ImageUploadController`
+  checks the same token. With `ADMIN_TOKEN` unset, nobody can write.
 - `config/WebConfig` — CORS, scoped to `http://localhost:*` so the frontend
   dev server can run on any port Vite picks.
 
@@ -84,7 +92,10 @@ collision and delete-reassociation logic. Both run against a real local
 Postgres database (`artlog_test`), not H2 — Postgres-specific behavior
 (the `oid`-vs-`text` column mapping, a Hibernate 6 join-fetch collision)
 has already bitten this project twice, so fidelity mattered more than
-speed. `ImageUploadControllerTest`, `LocalDiskImageStorageTest`, and
+speed. `AdminTokenInterceptorTest` sends real HTTP requests through
+`/graphql` and checks that mutations without the token are rejected and
+save nothing, while queries stay public. `AdminTokenTest`,
+`ImageUploadControllerTest`, `LocalDiskImageStorageTest`, and
 `CloudinaryImageStorageTest` (a malformed `CLOUDINARY_URL` must not leak
 the API secret into logs) are plain unit tests (no database). Run with `mvn test`.
 
@@ -113,6 +124,12 @@ the API secret into logs) are plain unit tests (no database). Run with `mvn test
   Apollo Client setup and all GraphQL documents in one place per concern.
 - `uploadImage.ts` — posts a file to `/api/images`, returns the URL to
   store on the artwork.
+- `adminToken.ts`, `useAdminAccess.ts` — the owner's token lives in this
+  browser's `localStorage` and is attached to every request. "Owner sign
+  in" (page footer) asks for it and keeps it only if the server's
+  `isAdmin` query confirms it. Editing controls (add, edit, delete, Manage
+  tags) render only when `isAdmin` is true. Hiding them is just UI; the
+  backend enforces the actual access.
 
 **Design**: plain black-on-white Helvetica, no borders or shadows, a
 single accent color (`--accent`, neon blue) used only for primary actions.
@@ -166,6 +183,10 @@ Images go to `backend/uploads/` by default. To use Cloudinary instead,
 the Cloudinary console, Settings → API Keys). The backend loads
 `backend/.env` on startup; it's gitignored, and real env vars override it.
 
+To edit locally, set `ADMIN_TOKEN` in `backend/.env`
+(`openssl rand -base64 32`), then use "Owner sign in" at the bottom of the
+page and paste it in.
+
 On backend startup, Hibernate creates the schema (`ddl-auto: update`) and
 `data.sql` seeds a starter set of tags.
 
@@ -178,46 +199,7 @@ cd frontend && npm test
 
 ## Next steps
 
-1. **User accounts** — the deployed app should let anyone sign up and keep
-   their own catalog. Today everything is global: any visitor could read,
-   edit, or delete every artwork and tag, and upload to the Cloudinary
-   account. This has to land before the app gets a public URL.
-
-   - **Auth approach (open decision).** Leaning toward a managed provider
-     (Clerk or Auth0): it handles sign-up, login, password reset, and
-     email verification, and the backend only validates the JWT it
-     issues (Spring Security as an OAuth2 resource server, a few lines of
-     config). Bearer tokens also sidestep the cross-site cookie problems
-     of a Vercel frontend talking to a Render/Railway backend. The
-     alternatives: Spring Security with our own email/password (BCrypt,
-     sessions, plus building reset and verification emails ourselves), or
-     "Sign in with GitHub/Google" via Spring's `oauth2Login` (no passwords
-     stored, but session cookies across two domains need the frontend
-     host to proxy API requests).
-   - **Data model.** An `app_user` table keyed by the auth provider's user
-     id. `Artwork` and `Tag` each get a non-null `owner`. Tags become
-     per-user, unique on `(owner, name, type)` instead of `(name, type)`,
-     because renaming or deleting a shared tag would change everyone
-     else's catalog. The starter tags in `data.sql` move to being created
-     for each user on first sign-in.
-   - **Migrations.** Adding non-null owner columns to tables that already
-     have rows is beyond what `ddl-auto: update` can do safely, and once a
-     database is deployed, schema changes need to be deliberate. Add
-     Flyway now: a baseline migration for the current schema, then one
-     for ownership. Switch Hibernate to `ddl-auto: validate`.
-   - **Scoping every read and write.** Resolve the current user once per
-     request. Add an `ownedBy(user)` specification and AND it into every
-     artwork query. Replace `findById` with `findByIdAndOwner`, so another
-     user's ids behave exactly like ids that don't exist and existence
-     doesn't leak. Scope `TagService` (find-or-create, rename collision,
-     delete) to the owner. `POST /api/images` requires a signed-in user.
-   - **Frontend.** Sign-in/sign-out UI and a signed-out landing state.
-     Attach the token to the Apollo link and to `uploadImage`.
-   - **Tests.** The invariant that matters is isolation: user A can't
-     read, edit, or delete user B's artworks or tags, and two users can
-     each have a tag named "Blue" without colliding. Extend
-     `ArtworkSpecificationsTest` and `TagServiceTest` with a second user.
-2. **Deploy prep** — small config changes the hosts need:
+1. **Deploy prep** — small config changes the hosts need:
    - `server.port: ${PORT:8080}` (Render and Railway assign the port).
    - `spring.datasource.url: ${DB_URL:jdbc:postgresql://localhost:5432/artlog}`.
      Hosts hand out `postgresql://user:pass@host/db` URLs, which need
@@ -227,16 +209,26 @@ cd frontend && npm test
    - A `Dockerfile` for the backend if deploying to Render (it has no
      native Java runtime). Railway builds Maven projects directly.
    - Regenerate the Cloudinary API secret before setting it on the host.
-3. **Deploy** — backend → Render/Railway with a managed Postgres instance;
+2. **Deploy** — backend → Render/Railway with a managed Postgres instance;
    frontend → Vercel/Netlify. Backend env: `DB_URL`, `DB_USERNAME`,
    `DB_PASSWORD`, `FRONTEND_ORIGIN_PATTERN` (the frontend's deployed
-   URL), `IMAGE_STORAGE=cloudinary`, `CLOUDINARY_URL`, plus the auth
-   provider's issuer. Frontend env (baked in at build time, so changes
-   need a rebuild): `VITE_GRAPHQL_URI`, `VITE_API_ORIGIN`, plus the auth
-   provider's publishable key. The deployed database starts empty; local
-   test data stays local.
-4. **Test coverage** — add tests alongside new mutations/components as
+   URL), `IMAGE_STORAGE=cloudinary`, `CLOUDINARY_URL`, `ADMIN_TOKEN` (a fresh
+   one, not the local dev token). Frontend env (baked in at build time, so
+   changes need a rebuild): `VITE_GRAPHQL_URI`, `VITE_API_ORIGIN`. The deployed database starts
+   empty; local test data stays local.
+3. **Test coverage** — add tests alongside new mutations/components as
    they're touched, rather than another backfill pass; the current tests
    intentionally cover only the logic that's complex enough for a bug to
    be invisible by eye.
-5. **Real data** — once deployed, actually log art you've seen.
+4. **Real data** — once deployed, actually log art you've seen.
+5. **Multi-user accounts (later, if wanted)** — let anyone sign up and keep
+   their own catalog. This replaces the single admin token. Likely shape:
+   - A managed auth provider (Clerk/Auth0), with the backend as an OAuth2
+     resource server validating its JWTs.
+   - An `app_user` table, and a non-null `owner` on `Artwork` and `Tag`.
+     Tags become unique per owner, so renaming one doesn't change anyone
+     else's catalog.
+   - Flyway migrations instead of `ddl-auto: update`.
+   - Every query scoped by owner. Another user's ids behave like ids
+     that don't exist.
+   - Tests asserting that users can't see or change each other's data.

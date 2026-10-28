@@ -7,7 +7,8 @@ import "./FilterPanel.css";
 interface FilterPanelProps {
   filter: ArtworkFilterInput;
   onChange: (filter: ArtworkFilterInput) => void;
-  onManageTags: () => void;
+  /** Omitted for visitors, who can't edit tags. */
+  onManageTags?: () => void;
 }
 
 export function FilterPanel({ filter, onChange, onManageTags }: FilterPanelProps) {
@@ -55,9 +56,11 @@ export function FilterPanel({ filter, onChange, onManageTags }: FilterPanelProps
         })}
       </div>
 
-      <button type="button" className="filter-panel__manage-tags" onClick={onManageTags}>
-        Manage tags
-      </button>
+      {onManageTags && (
+        <button type="button" className="filter-panel__manage-tags" onClick={onManageTags}>
+          Manage tags
+        </button>
+      )}
     </section>
   );
 }

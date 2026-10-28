@@ -53,3 +53,7 @@
   background: transparent;
   color: var(--ink);
 }
+
+.app__sort {
+  margin-left: auto;
+}

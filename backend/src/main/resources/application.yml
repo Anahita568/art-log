@@ -32,6 +32,7 @@ server:
 
 artlog:
   frontend-origin-pattern: ${FRONTEND_ORIGIN_PATTERN:http://localhost:*}
+  admin-token: ${ADMIN_TOKEN:}  # unset = read-only for everyone
   storage: ${IMAGE_STORAGE:local}  # local | cloudinary
   upload-dir: ${UPLOAD_DIR:uploads}  # local storage only
   public-base-url: ${PUBLIC_BASE_URL:http://localhost:8080}  # local storage only

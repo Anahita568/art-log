@@ -32,3 +32,9 @@ export const TAGS_QUERY = gql`
     }
   }
 `;
+
+export const IS_ADMIN_QUERY = gql`
+  query IsAdmin {
+    isAdmin
+  }
+`;

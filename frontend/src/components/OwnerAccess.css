@@ -1,0 +1,43 @@
+.owner-access__toggle,
+.owner-access__form button {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.owner-access__toggle:hover,
+.owner-access__form button:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.owner-access__form {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.owner-access__form input {
+  font-size: 0.85rem;
+  padding: 0.3rem 0;
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+}
+
+.owner-access__form input:focus {
+  outline: none;
+  border-bottom-color: var(--ink);
+}
+
+.owner-access__error {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--accent);
+}

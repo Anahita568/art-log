@@ -1,3 +1,4 @@
+import { adminHeaders } from "./adminToken";
 import { API_ORIGIN } from "./config";
 
 export async function uploadImage(file: File): Promise<string> {
@@ -6,6 +7,7 @@ export async function uploadImage(file: File): Promise<string> {
 
   const response = await fetch(`${API_ORIGIN}/api/images`, {
     method: "POST",
+    headers: adminHeaders(),
     body: formData,
   });
 

@@ -12,10 +12,11 @@ import "./ArtworkDetail.css";
 
 interface ArtworkDetailProps {
   artwork: Artwork;
+  canEdit: boolean;
   onClose: () => void;
 }
 
-export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
+export function ArtworkDetail({ artwork, canEdit, onClose }: ArtworkDetailProps) {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [draftNotes, setDraftNotes] = useState(artwork.notes ?? "");
   const [isEditingDetails, setIsEditingDetails] = useState(false);
@@ -96,9 +97,11 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
             <>
               <div className="artwork-detail__title-row">
                 <h2 className="artwork-detail__title">{artwork.title}</h2>
-                <button type="button" className="card-action" onClick={() => setIsEditingDetails(true)}>
-                  Edit details
-                </button>
+                {canEdit && (
+                  <button type="button" className="card-action" onClick={() => setIsEditingDetails(true)}>
+                    Edit details
+                  </button>
+                )}
               </div>
               {byline && <p className="artwork-detail__byline">{byline}</p>}
 
@@ -115,7 +118,7 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
           <div className="artwork-detail__notes-section">
             <div className="artwork-detail__notes-header">
               <span className="artwork-detail__notes-label">Notes</span>
-              {!isEditingNotes && (
+              {canEdit && !isEditingNotes && (
                 <button type="button" className="card-action" onClick={startEditingNotes}>
                   Edit
                 </button>
@@ -144,9 +147,11 @@ export function ArtworkDetail({ artwork, onClose }: ArtworkDetailProps) {
             )}
           </div>
 
-          <button type="button" className="card-action card-action--delete" onClick={handleDelete} disabled={deleting}>
-            {deleting ? "Removing…" : "Delete this piece"}
-          </button>
+          {canEdit && (
+            <button type="button" className="card-action card-action--delete" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Removing…" : "Delete this piece"}
+            </button>
+          )}
         </div>
       </div>
     </div>

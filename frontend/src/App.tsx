@@ -3,6 +3,8 @@ import { FilterPanel } from "./components/FilterPanel";
 import { ArtworkGrid } from "./components/ArtworkGrid";
 import { AddArtworkForm } from "./components/AddArtworkForm";
 import { TagManager } from "./components/TagManager";
+import { OwnerAccess } from "./components/OwnerAccess";
+import { useAdminAccess } from "./useAdminAccess";
 import type { ArtworkFilterInput, ArtworkSort } from "./types";
 import "./App.css";
 
@@ -18,6 +20,7 @@ export default function App() {
   const [filter, setFilter] = useState<ArtworkFilterInput>({});
   const [sort, setSort] = useState<ArtworkSort>("CREATED_DATE_DESC");
   const [isManagingTags, setIsManagingTags] = useState(false);
+  const { isAdmin, unlock, lock } = useAdminAccess();
 
   return (
     <div className="app">
@@ -26,10 +29,14 @@ export default function App() {
         <p className="app__subtitle">track your art</p>
       </header>
 
-      <FilterPanel filter={filter} onChange={setFilter} onManageTags={() => setIsManagingTags(true)} />
+      <FilterPanel
+        filter={filter}
+        onChange={setFilter}
+        onManageTags={isAdmin ? () => setIsManagingTags(true) : undefined}
+      />
 
       <div className="app__toolbar">
-        <AddArtworkForm />
+        {isAdmin && <AddArtworkForm />}
         <label className="app__sort">
           Sort by
           <select value={sort} onChange={(event) => setSort(event.target.value as ArtworkSort)}>
@@ -42,9 +49,13 @@ export default function App() {
         </label>
       </div>
 
-      <ArtworkGrid key={`${JSON.stringify(filter)}|${sort}`} filter={filter} sort={sort} />
+      <ArtworkGrid key={`${JSON.stringify(filter)}|${sort}`} filter={filter} sort={sort} canEdit={isAdmin} />
 
-      {isManagingTags && <TagManager onClose={() => setIsManagingTags(false)} />}
+      {isAdmin && isManagingTags && <TagManager onClose={() => setIsManagingTags(false)} />}
+
+      <footer className="app__footer">
+        <OwnerAccess isAdmin={isAdmin} onUnlock={unlock} onLock={lock} />
+      </footer>
     </div>
   );
 }
