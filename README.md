@@ -178,16 +178,65 @@ cd frontend && npm test
 
 ## Next steps
 
-1. **Deploy** — nothing is deployed yet. Backend → Render/Railway with a
-   managed Postgres instance and `IMAGE_STORAGE=cloudinary` +
-   `CLOUDINARY_URL` set; frontend → Vercel/Netlify.
-2. **Test coverage** — add tests alongside new mutations/components as
+1. **User accounts** — the deployed app should let anyone sign up and keep
+   their own catalog. Today everything is global: any visitor could read,
+   edit, or delete every artwork and tag, and upload to the Cloudinary
+   account. This has to land before the app gets a public URL.
+
+   - **Auth approach (open decision).** Leaning toward a managed provider
+     (Clerk or Auth0): it handles sign-up, login, password reset, and
+     email verification, and the backend only validates the JWT it
+     issues (Spring Security as an OAuth2 resource server, a few lines of
+     config). Bearer tokens also sidestep the cross-site cookie problems
+     of a Vercel frontend talking to a Render/Railway backend. The
+     alternatives: Spring Security with our own email/password (BCrypt,
+     sessions, plus building reset and verification emails ourselves), or
+     "Sign in with GitHub/Google" via Spring's `oauth2Login` (no passwords
+     stored, but session cookies across two domains need the frontend
+     host to proxy API requests).
+   - **Data model.** An `app_user` table keyed by the auth provider's user
+     id. `Artwork` and `Tag` each get a non-null `owner`. Tags become
+     per-user, unique on `(owner, name, type)` instead of `(name, type)`,
+     because renaming or deleting a shared tag would change everyone
+     else's catalog. The starter tags in `data.sql` move to being created
+     for each user on first sign-in.
+   - **Migrations.** Adding non-null owner columns to tables that already
+     have rows is beyond what `ddl-auto: update` can do safely, and once a
+     database is deployed, schema changes need to be deliberate. Add
+     Flyway now: a baseline migration for the current schema, then one
+     for ownership. Switch Hibernate to `ddl-auto: validate`.
+   - **Scoping every read and write.** Resolve the current user once per
+     request. Add an `ownedBy(user)` specification and AND it into every
+     artwork query. Replace `findById` with `findByIdAndOwner`, so another
+     user's ids behave exactly like ids that don't exist and existence
+     doesn't leak. Scope `TagService` (find-or-create, rename collision,
+     delete) to the owner. `POST /api/images` requires a signed-in user.
+   - **Frontend.** Sign-in/sign-out UI and a signed-out landing state.
+     Attach the token to the Apollo link and to `uploadImage`.
+   - **Tests.** The invariant that matters is isolation: user A can't
+     read, edit, or delete user B's artworks or tags, and two users can
+     each have a tag named "Blue" without colliding. Extend
+     `ArtworkSpecificationsTest` and `TagServiceTest` with a second user.
+2. **Deploy prep** — small config changes the hosts need:
+   - `server.port: ${PORT:8080}` (Render and Railway assign the port).
+   - `spring.datasource.url: ${DB_URL:jdbc:postgresql://localhost:5432/artlog}`.
+     Hosts hand out `postgresql://user:pass@host/db` URLs, which need
+     rewriting to `jdbc:postgresql://host:5432/db` with the username and
+     password set separately.
+   - GraphiQL off unless enabled by an env var.
+   - A `Dockerfile` for the backend if deploying to Render (it has no
+     native Java runtime). Railway builds Maven projects directly.
+   - Regenerate the Cloudinary API secret before setting it on the host.
+3. **Deploy** — backend → Render/Railway with a managed Postgres instance;
+   frontend → Vercel/Netlify. Backend env: `DB_URL`, `DB_USERNAME`,
+   `DB_PASSWORD`, `FRONTEND_ORIGIN_PATTERN` (the frontend's deployed
+   URL), `IMAGE_STORAGE=cloudinary`, `CLOUDINARY_URL`, plus the auth
+   provider's issuer. Frontend env (baked in at build time, so changes
+   need a rebuild): `VITE_GRAPHQL_URI`, `VITE_API_ORIGIN`, plus the auth
+   provider's publishable key. The deployed database starts empty; local
+   test data stays local.
+4. **Test coverage** — add tests alongside new mutations/components as
    they're touched, rather than another backfill pass; the current tests
    intentionally cover only the logic that's complex enough for a bug to
    be invisible by eye.
-3. **Stretch features** (all optional, from the original plan): URL-synced
-   filter state for shareable/bookmarkable views; custom "shelves" or
-   collections; auth (likely moot for a single-user personal tool, but
-   worth a conscious decision).
-4. **Real data** — the catalog is functionally complete; the last step is
-   actually logging art you've seen.
+5. **Real data** — once deployed, actually log art you've seen.
