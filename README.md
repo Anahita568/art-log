@@ -4,6 +4,8 @@ A personal art cataloging tool: save pieces you've encountered, tag them
 along independent axes (medium, movement, mood, color, subject), and filter
 your collection by any combination of tags.
 
+**Live:** https://art-log-orcin.vercel.app (read-only for visitors).
+
 **Stack:** Spring Boot + GraphQL (backend), PostgreSQL (database), React +
 TypeScript + Apollo Client (frontend).
 
@@ -232,13 +234,12 @@ The deployed database starts empty; local data stays local.
 
 ## Next steps
 
-1. **Deploy** — follow [Deploy](#deploy) above. Nothing is live yet.
-2. **Test coverage** — add tests alongside new mutations/components as
+1. **Test coverage** — add tests alongside new mutations/components as
    they're touched, rather than another backfill pass; the current tests
    intentionally cover only the logic that's complex enough for a bug to
    be invisible by eye.
-3. **Real data** — once deployed, actually log art you've seen.
-4. **Multi-user accounts (later, if wanted)** — let anyone sign up and keep
+2. **Real data** — keep logging art you've seen.
+3. **Multi-user accounts (later, if wanted)** — let anyone sign up and keep
    their own catalog. This replaces the single admin token. Likely shape:
    - A managed auth provider (Clerk/Auth0), with the backend as an OAuth2
      resource server validating its JWTs.
